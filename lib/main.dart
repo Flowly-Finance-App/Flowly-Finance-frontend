@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/presentation/splash_screen.dart';
+import 'features/auth/presentation/login_screen.dart';
 
 void main() {
   runApp(
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Small Finance App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+      home: const LoginScreen(),
     );
   }
 }
