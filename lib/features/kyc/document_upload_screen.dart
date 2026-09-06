@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
+import 'ocr_result_screen.dart';
 
 class DocumentUploadScreen extends StatefulWidget {
   const DocumentUploadScreen({super.key});
@@ -22,7 +23,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage(bool isAadhaar) async {
-    // Camera അല്ലെങ്കിൽ Gallery തിരഞ്ഞെടുക്കാൻ ഒരു bottom sheet കാണിക്കുന്നു
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -55,7 +55,7 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
 
     final pickedFile = await _picker.pickImage(
       source: source,
-      imageQuality: 80, // File size കുറയ്ക്കാൻ, upload വേഗത്തിലാക്കാൻ
+      imageQuality: 80,
     );
 
     if (pickedFile != null) {
@@ -89,13 +89,13 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO Day 8: ഇവിടെ OCR API call ചെയ്ത്, extracted info next screen-ൽ കാണിക്കണം
+    // TODO Day 27: ഇവിടെ actual document upload API call ചെയ്യണം
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documents uploaded (OCR not connected yet)')),
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const OcrResultScreen()),
       );
     });
   }
@@ -186,7 +186,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
           const SizedBox(height: AppSpacing.md),
 
           if (image == null)
-            // Upload ചെയ്യാത്ത അവസ്ഥ — Upload button കാണിക്കുന്നു
             GestureDetector(
               onTap: onUpload,
               child: Container(
@@ -211,7 +210,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
               ),
             )
           else
-            // Upload ചെയ്ത അവസ്ഥ — Image preview + Remove/Re-upload options
             Column(
               children: [
                 ClipRRect(
