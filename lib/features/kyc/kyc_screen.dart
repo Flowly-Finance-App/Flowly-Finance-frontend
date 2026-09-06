@@ -5,6 +5,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
+
 enum Gender { male, female, other }
 
 class KycScreen extends StatefulWidget {
