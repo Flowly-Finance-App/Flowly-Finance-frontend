@@ -1,3 +1,4 @@
+import 'package:flowly_finance_app/features/kyc/document_upload_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
@@ -76,14 +77,14 @@ class _KycScreenState extends State<KycScreen> {
     setState(() => _isLoading = true);
 
     // TODO Day 27: ഇവിടെ actual KYC Submit API call ചെയ്യണം
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+   Future.delayed(const Duration(seconds: 2), () {
+  if (!mounted) return;
+  setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('KYC info saved (API not connected yet)')),
-      );
-    });
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (context) => const DocumentUploadScreen()),
+  );
+});
   }
 
   @override
