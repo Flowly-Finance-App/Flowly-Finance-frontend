@@ -1,3 +1,5 @@
+import 'package:flowly_finance_app/features/auth/presentation/forgot_password_screen.dart';
+import 'package:flowly_finance_app/features/auth/presentation/register_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -127,12 +129,14 @@ Center(
                 // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // TODO Day 25: Forgot Password screen navigation
-                    },
-                    child: Text(
-                      'Forgot Password?',
+                  child:TextButton(
+  onPressed: () {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+    );
+  },
+  child: Text(
+    'Forgot Password?',
                       style: AppTextStyles.bodySecondary.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -194,12 +198,15 @@ Center(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("Don't have an account? ", style: AppTextStyles.bodySecondary),
-                      GestureDetector(
-                        onTap: () {
-                          // TODO Day 5: Register screen navigation
-                        },
-                        child: Text(
-                          'Register',
+                     GestureDetector(
+  onTap: () {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+    );
+  },
+  child: Text(
+    'Register',
+    
                           style: AppTextStyles.body.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,

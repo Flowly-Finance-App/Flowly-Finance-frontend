@@ -11,6 +11,7 @@ class AppTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final int maxLines;
   final bool enabled;
+  final IconData? prefixIcon;
 
   const AppTextField({
     super.key,
@@ -22,6 +23,7 @@ class AppTextField extends StatefulWidget {
     this.validator,
     this.maxLines = 1,
     this.enabled = true,
+    this.prefixIcon,
   });
 
   @override
@@ -48,6 +50,9 @@ class _AppTextFieldState extends State<AppTextField> {
           style: AppTextStyles.body,
           decoration: InputDecoration(
             hintText: widget.hintText,
+            prefixIcon: widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, color: AppColors.textSecondary, size: 20)
+                : null,
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
