@@ -1,11 +1,11 @@
-import 'package:flowly_finance_app/features/auth/presentation/forgot_password_screen.dart';
-import 'package:flowly_finance_app/features/auth/presentation/register_screen.dart';
+import 'package:flowly_finance_app/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:flowly_finance_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_spacing.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_text_field.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,19 +35,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO Day 27: ഇവിടെ actual Login API call ചെയ്യണം
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login button pressed (API not connected yet)')),
+        const SnackBar(
+          content: Text('Login button pressed (API not connected yet)'),
+        ),
       );
     });
   }
 
   void _handleGoogleSignIn() {
-    // TODO Day 27: ഇവിടെ Google Sign-In package + OAuth setup വേണം
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Google Sign-In will be connected later')),
     );
@@ -71,23 +71,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: AppSpacing.md),
 
                 // Logo
-               // Logo
-Center(
-  child: Image.asset(
-    'assets/images/flowly-image-png.png',
-    width: 72,
-    height: 72,
-  ),
-),
+                // Logo
+                Center(
+                  child: Image.asset(
+                    'assets/images/flowly-image-png.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                ),
 
                 const SizedBox(height: AppSpacing.lg),
 
                 Text('Welcome Back!', style: AppTextStyles.heading),
                 const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Login to continue',
-                  style: AppTextStyles.bodySecondary,
-                ),
+                Text('Login to continue', style: AppTextStyles.bodySecondary),
 
                 const SizedBox(height: AppSpacing.xl),
 
@@ -129,14 +126,16 @@ Center(
                 // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
-                  child:TextButton(
-  onPressed: () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-    );
-  },
-  child: Text(
-    'Forgot Password?',
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Forgot Password?',
                       style: AppTextStyles.bodySecondary.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -161,7 +160,9 @@ Center(
                   children: [
                     const Expanded(child: Divider(color: AppColors.border)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
                       child: Text('OR', style: AppTextStyles.caption),
                     ),
                     const Expanded(child: Divider(color: AppColors.border)),
@@ -170,7 +171,6 @@ Center(
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Google Sign-In Button
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -179,13 +179,21 @@ Center(
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                       ),
                     ),
-                    icon: const Icon(Icons.g_mobiledata, size: 28, color: AppColors.textPrimary),
+                    icon: const Icon(
+                      Icons.g_mobiledata,
+                      size: 28,
+                      color: AppColors.textPrimary,
+                    ),
                     label: Text(
                       'Continue with Google',
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -197,16 +205,21 @@ Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don't have an account? ", style: AppTextStyles.bodySecondary),
-                     GestureDetector(
-  onTap: () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const RegisterScreen()),
-    );
-  },
-  child: Text(
-    'Register',
-    
+                      Text(
+                        "Don't have an account? ",
+                        style: AppTextStyles.bodySecondary,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Register',
+
                           style: AppTextStyles.body.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,

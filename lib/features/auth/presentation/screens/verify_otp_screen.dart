@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_spacing.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/widgets/app_button.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../kyc/kyc_intro_screen.dart';
 
-class OtpVerificationScreen extends StatefulWidget {
-  final String email;
+class VerifyOtpScreen extends StatefulWidget {
+  final String mobileNumber;
 
-  const OtpVerificationScreen({super.key, required this.email});
+  const VerifyOtpScreen({super.key, required this.mobileNumber});
 
   @override
-  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
 }
 
-class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  // 6 boxes-ന് 6 separate controllers ഉം focus nodes ഉം
+class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _focusNodes =
@@ -56,13 +56,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO Day 27: ഇവിടെ actual Verify OTP API call ചെയ്യണം
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP verified (API not connected yet)')),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const KycIntroScreen()),
       );
     });
   }
@@ -70,7 +69,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void _handleResend() {
     if (_secondsRemaining > 0) return;
 
-    // TODO Day 27: ഇവിടെ actual Resend OTP API call ചെയ്യണം
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('OTP resent')),
     );
@@ -105,20 +103,32 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.xl),
 
-              Text('OTP Verification', style: AppTextStyles.heading),
-              const SizedBox(height: AppSpacing.xs),
+              Container(
+                width: 88,
+                height: 88,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.lock_outline_rounded, color: Colors.white, size: 40),
+              ),
+
+              const SizedBox(height: AppSpacing.xl),
+
+              Text('Verify OTP', style: AppTextStyles.heading),
+              const SizedBox(height: AppSpacing.sm),
               Text(
-                'Enter the 6-digit code sent to\n${widget.email}',
+                'Enter the 6 digit code sent to',
                 style: AppTextStyles.bodySecondary,
               ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(widget.mobileNumber, style: AppTextStyles.subheading),
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // 6 OTP Boxes
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(6, (index) => _buildOtpBox(index)),
@@ -126,20 +136,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               const SizedBox(height: AppSpacing.lg),
 
-              // Resend Timer / Button
               Center(
                 child: _secondsRemaining > 0
                     ? Text(
-                        'Resend OTP in $_secondsRemaining s',
+                        "Didn't Receive The OTP? Resend in $_secondsRemaining s",
                         style: AppTextStyles.bodySecondary,
                       )
                     : GestureDetector(
                         onTap: _handleResend,
-                        child: Text(
-                          'Resend OTP',
-                          style: AppTextStyles.body.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                        child: RichText(
+                          text: TextSpan(
+                            style: AppTextStyles.bodySecondary,
+                            children: [
+                              const TextSpan(text: "Didn't Receive The OTP? "),
+                              TextSpan(
+                                text: 'Resend OTP',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -148,7 +165,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               const SizedBox(height: AppSpacing.xxl),
 
               AppButton(
-                label: 'Verify',
+                label: 'Verify & Proceed',
                 onPressed: _handleVerify,
                 isLoading: _isLoading,
               ),
@@ -161,8 +178,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   Widget _buildOtpBox(int index) {
     return SizedBox(
-      width: 48,
-      height: 56,
+      width: 44,
+      height: 52,
       child: TextField(
         controller: _controllers[index],
         focusNode: _focusNodes[index],
@@ -172,7 +189,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         style: AppTextStyles.heading,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
-          counterText: '', // maxLength-ന്റെ default character counter hide ചെയ്യുന്നു
+          counterText: '',
           filled: true,
           fillColor: AppColors.surface,
           border: OutlineInputBorder(
@@ -184,12 +201,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
         ),
-        onChanged: (value) {
-          // ഒരു digit type ചെയ്താൽ, next box-ലേക്ക് automatic ആയി jump ചെയ്യുന്നു
+        onChanged: (value) {     
           if (value.isNotEmpty && index < 5) {
             _focusNodes[index + 1].requestFocus();
           }
-          // Backspace press ചെയ്താൽ, previous box-ലേക്ക് തിരികെ പോകുന്നു
           if (value.isEmpty && index > 0) {
             _focusNodes[index - 1].requestFocus();
           }

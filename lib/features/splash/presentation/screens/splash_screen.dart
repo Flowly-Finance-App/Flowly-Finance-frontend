@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../auth/presentation/screens/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,36 +19,30 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-
     _fadeAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeIn,
     );
-
     _animationController.forward();
-
     _navigateNext();
   }
 
   Future<void> _navigateNext() async {
-    // 2.5 seconds splash-ന് ശേഷം navigate ചെയ്യുക
     await Future.delayed(const Duration(milliseconds: 2500));
 
     if (!mounted) return;
 
-    // TODO Day 6/27: ഇവിടെ actual authentication status check ചെയ്യണം
-    // (secure storage-ൽ token ഉണ്ടോ എന്ന് നോക്കി Login/Home തീരുമാനിക്കണം)
-    final bool isLoggedIn = false; // temporary hardcoded value
+    final bool isLoggedIn = false;
 
     if (isLoggedIn) {
-      // Navigator.of(context).pushReplacementNamed(RouteNames.home);
     } else {
-      // Navigator.of(context).pushReplacementNamed(RouteNames.login);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
     }
   }
 
@@ -69,10 +64,10 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               Image.asset(
                 'assets/images/flowly-image-png.png',
-                width: 140,
-                height: 140,
+                width: 200,
+                height: 200,
               ),
-              const SizedBox(height: 24),
+              // const SizedBox(height: 5),
               Text(
                 'Flowly',
                 style: AppTextStyles.heading,

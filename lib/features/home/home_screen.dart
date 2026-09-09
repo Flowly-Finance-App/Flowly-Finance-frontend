@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Center(
         child: Text(
-          'Home Dashboard\n(Day 11-ൽ build ചെയ്യും)',
+          'home',
           textAlign: TextAlign.center,
           style: AppTextStyles.heading,
         ),

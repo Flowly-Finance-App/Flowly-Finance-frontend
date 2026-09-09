@@ -1,12 +1,10 @@
-
-import 'package:flowly_finance_app/features/kyc/kyc_screen.dart';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_spacing.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_text_field.dart';
-
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_text_field.dart';
+import 'mobile_otp_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -51,19 +49,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO Day 27: ഇവിടെ actual Register API call ചെയ്യണം
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const KycScreen()),
+        MaterialPageRoute(
+          builder: (context) => MobileOtpScreen(mobileNumber: _mobileController.text.trim()),
+        ),
       );
     });
   }
 
   void _handleGoogleSignIn() {
-    // TODO Day 27: Google Sign-In integration
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Google Sign-In will be connected later')),
     );
@@ -92,13 +90,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Center(
                   child: Image.asset(
                     'assets/images/flowly-image-png.png',
-                    width: 72,
-                    height: 72,
+                    width: 200,
+                    height: 200,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // "Get Started" heading with colored second word
                 Center(
                   child: RichText(
                     text: TextSpan(
@@ -116,7 +113,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.xl),
 
-                // Full Name
                 AppTextField(
                   label: 'Full Name',
                   hintText: 'Full Name',
@@ -136,7 +132,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Email
                 AppTextField(
                   label: 'Email',
                   hintText: 'Email',
@@ -157,7 +152,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Mobile Number
                 AppTextField(
                   label: 'Mobile Number',
                   hintText: 'Mobile Number',
@@ -177,7 +171,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Password
                 AppTextField(
                   label: 'Password',
                   hintText: 'Password',
@@ -197,7 +190,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Confirm Password
                 AppTextField(
                   label: 'Confirm Password',
                   hintText: 'Confirm Password',
@@ -217,7 +209,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Terms & Conditions Checkbox
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -266,7 +257,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Register Button
                 AppButton(
                   label: 'Register',
                   onPressed: _handleRegister,
@@ -275,7 +265,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // OR Divider
                 Row(
                   children: [
                     const Expanded(child: Divider(color: AppColors.border)),
@@ -289,7 +278,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Google Sign-In Button
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -311,7 +299,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Login Navigation
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

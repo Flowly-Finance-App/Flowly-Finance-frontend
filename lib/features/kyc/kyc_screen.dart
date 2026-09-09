@@ -1,13 +1,10 @@
-import 'package:flowly_finance_app/features/kyc/document_upload_screen.dart';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
-
-
-enum Gender { male, female, other }
+import 'identity_verification_screen.dart';
 
 class KycScreen extends StatefulWidget {
   const KycScreen({super.key});
@@ -19,35 +16,32 @@ class KycScreen extends StatefulWidget {
 class _KycScreenState extends State<KycScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final _nameController = TextEditingController();
   final _dobController = TextEditingController();
-  final _addressLine1Controller = TextEditingController();
-  final _addressLine2Controller = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-  final _pincodeController = TextEditingController();
+  final _mobileController = TextEditingController();
+  final _emailController = TextEditingController();
 
-  Gender? _selectedGender;
-  DateTime? _selectedDate;
+  String? _selectedGender;
+  String? _selectedCity;
   bool _isLoading = false;
+
+  final List<String> _genders = ['Male', 'Female', 'Other'];
+  final List<String> _cities = ['Kochi', 'Kozhikode', 'Thrissur', 'Thiruvananthapuram'];
 
   @override
   void dispose() {
+    _nameController.dispose();
     _dobController.dispose();
-    _addressLine1Controller.dispose();
-    _addressLine2Controller.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pincodeController.dispose();
+    _mobileController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   Future<void> _pickDate() async {
     final today = DateTime.now();
-    final initialDate = DateTime(today.year - 18, today.month, today.day);
-
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: initialDate,
+      initialDate: DateTime(today.year - 18, today.month, today.day),
       firstDate: DateTime(1940),
       lastDate: DateTime(today.year - 18, today.month, today.day),
       helpText: 'Select Date of Birth',
@@ -55,7 +49,6 @@ class _KycScreenState extends State<KycScreen> {
 
     if (pickedDate != null) {
       setState(() {
-        _selectedDate = pickedDate;
         _dobController.text =
             '${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}';
       });
@@ -63,9 +56,7 @@ class _KycScreenState extends State<KycScreen> {
   }
 
   void _handleContinue() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (_selectedGender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,18 +64,23 @@ class _KycScreenState extends State<KycScreen> {
       );
       return;
     }
+    if (_selectedCity == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your branch/homecity')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
-    // TODO Day 27: ഇവിടെ actual KYC Submit API call ചെയ്യണം
-   Future.delayed(const Duration(seconds: 2), () {
-  if (!mounted) return;
-  setState(() => _isLoading = false);
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
 
-  Navigator.of(context).push(
-    MaterialPageRoute(builder: (context) => const DocumentUploadScreen()),
-  );
-});
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const IdentityVerificationScreen()),
+      );
+    });
   }
 
   @override
@@ -94,7 +90,7 @@ class _KycScreenState extends State<KycScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('KYC Verification', style: AppTextStyles.subheading),
+        title: Text('Personal Details', style: AppTextStyles.subheading),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
@@ -109,62 +105,96 @@ class _KycScreenState extends State<KycScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Personal Information', style: AppTextStyles.heading),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Please provide your personal details for verification',
-                  style: AppTextStyles.bodySecondary,
-                ),
-
-                const SizedBox(height: AppSpacing.xl),
-
-                // Date of Birth (Read-only, opens date picker)
-                GestureDetector(
-                  onTap: _pickDate,
-                  child: AbsorbPointer(
-                    child: AppTextField(
-                      label: 'Date of Birth',
-                      hintText: 'DD/MM/YYYY',
-                      controller: _dobController,
-                      prefixIcon: Icons.calendar_today_outlined,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please select your date of birth';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+                AppTextField(
+                  label: 'Full legal name',
+                  controller: _nameController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your full name';
+                    }
+                    return null;
+                  },
                 ),
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Gender Selection
-                Text('Gender', style: AppTextStyles.body),
-                const SizedBox(height: AppSpacing.sm),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildGenderOption(Gender.male, 'Male'),
-                    const SizedBox(width: AppSpacing.sm),
-                    _buildGenderOption(Gender.female, 'Female'),
-                    const SizedBox(width: AppSpacing.sm),
-                    _buildGenderOption(Gender.other, 'Other'),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: _pickDate,
+                        child: AbsorbPointer(
+                          child: AppTextField(
+                            label: 'Date of birth',
+                            hintText: 'DD/MM/YYYY',
+                            controller: _dobController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Required';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Gender', style: AppTextStyles.body),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            initialValue: _selectedGender,
+                            items: _genders
+                                .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                                .toList(),
+                            onChanged: (value) => setState(() => _selectedGender = value),
+                            decoration: const InputDecoration(hintText: 'Select'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
 
-                const SizedBox(height: AppSpacing.lg),
-
-                Text('Address', style: AppTextStyles.subheading),
                 const SizedBox(height: AppSpacing.md),
 
                 AppTextField(
-                  label: 'Address Line 1',
-                  hintText: 'House / Flat No, Building Name',
-                  controller: _addressLine1Controller,
-                  prefixIcon: Icons.home_outlined,
+                  label: 'Mobile number',
+                  controller: _mobileController,
+                  keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your address';
+                      return 'Please enter your mobile number';
+                    }
+                    if (value.trim().length != 10) {
+                      return 'Enter a valid 10-digit mobile number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  "We'll send an OTP to verify this number.",
+                  style: AppTextStyles.caption,
+                ),
+
+                const SizedBox(height: AppSpacing.md),
+
+                AppTextField(
+                  label: 'Email address',
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'Enter a valid email address';
                     }
                     return null;
                   },
@@ -172,60 +202,15 @@ class _KycScreenState extends State<KycScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                AppTextField(
-                  label: 'Address Line 2 (Optional)',
-                  hintText: 'Street, Landmark',
-                  controller: _addressLine2Controller,
-                  prefixIcon: Icons.location_on_outlined,
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                AppTextField(
-                  label: 'City',
-                  hintText: 'Enter your city',
-                  controller: _cityController,
-                  prefixIcon: Icons.location_city_outlined,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your city';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                AppTextField(
-                  label: 'State',
-                  hintText: 'Enter your state',
-                  controller: _stateController,
-                  prefixIcon: Icons.map_outlined,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your state';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                AppTextField(
-                  label: 'Pincode',
-                  hintText: 'Enter 6-digit pincode',
-                  controller: _pincodeController,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: Icons.pin_drop_outlined,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your pincode';
-                    }
-                    if (value.trim().length != 6) {
-                      return 'Enter a valid 6-digit pincode';
-                    }
-                    return null;
-                  },
+                Text('Branch / homecity', style: AppTextStyles.body),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCity,
+                  items: _cities
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _selectedCity = value),
+                  decoration: const InputDecoration(hintText: 'Select your city'),
                 ),
 
                 const SizedBox(height: AppSpacing.xl),
@@ -238,36 +223,6 @@ class _KycScreenState extends State<KycScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGenderOption(Gender gender, String label) {
-    final isSelected = _selectedGender == gender;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _selectedGender = gender),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.border,
-              width: isSelected ? 1.5 : 1,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: AppTextStyles.body.copyWith(
-                color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              ),
             ),
           ),
         ),

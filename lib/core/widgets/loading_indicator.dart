@@ -28,7 +28,7 @@ class LoadingIndicator extends StatelessWidget {
   }
 }
 
-// Full screen loading overlay - API call ചെയ്യുമ്പോൾ screen മുഴുവൻ block ചെയ്യാൻ
+
 class LoadingOverlay extends StatelessWidget {
   const LoadingOverlay({super.key});
 
