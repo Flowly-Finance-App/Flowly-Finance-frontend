@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
 import 'kyc_screen.dart';
 
-class KycIntroScreen extends StatelessWidget {
+class KycIntroScreen extends ConsumerWidget {
   const KycIntroScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

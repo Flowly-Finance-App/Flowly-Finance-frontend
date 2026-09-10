@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../providers/kyc_status_provider.dart';
 import 'kyc_success_screen.dart';
 
-class VerificationProgressScreen extends StatelessWidget {
+class VerificationProgressScreen extends ConsumerWidget {
   const VerificationProgressScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statusAsync = ref.watch(kycStatusProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -19,7 +23,6 @@ class VerificationProgressScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: AppSpacing.xxl),
-
                 Container(
                   width: 96,
                   height: 96,
@@ -29,9 +32,7 @@ class VerificationProgressScreen extends StatelessWidget {
                   ),
                   child: const Icon(Icons.hourglass_top_rounded, color: AppColors.primary, size: 44),
                 ),
-
                 const SizedBox(height: AppSpacing.xl),
-
                 Text('Verification in Progress', style: AppTextStyles.heading, textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -39,9 +40,7 @@ class VerificationProgressScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySecondary,
                 ),
-
                 const SizedBox(height: AppSpacing.xxl),
-
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Column(
@@ -58,37 +57,48 @@ class VerificationProgressScreen extends StatelessWidget {
                       _buildConnector(),
                       _buildStep(
                         number: '2',
-                        icon: null,
-                        iconColor: AppColors.textSecondary,
+                        icon: statusAsync.value == 'approved' ? Icons.check_circle : null,
+                        iconColor: AppColors.success,
                         title: 'KYC under review',
-                        subtitle: 'Our team is verifying your documents',
-                        isDone: false,
+                        subtitle: statusAsync.when(
+                          data: (status) => status == 'approved'
+                              ? 'Verified'
+                              : status == 'rejected'
+                                  ? 'Rejected — please re-check documents'
+                                  : 'Our team is verifying your documents',
+                          loading: () => 'Checking status...',
+                          error: (e, _) => 'Could not check status',
+                        ),
+                        isDone: statusAsync.value == 'approved',
                       ),
                       _buildConnector(),
                       _buildStep(
                         number: '3',
-                        icon: null,
-                        iconColor: AppColors.textSecondary,
+                        icon: statusAsync.value == 'approved' ? Icons.check_circle : null,
+                        iconColor: AppColors.success,
                         title: 'Account creation',
                         subtitle: 'Happens automatically once approved',
-                        isDone: false,
+                        isDone: statusAsync.value == 'approved',
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.xxl),
-
-                AppButton(
-                  label: 'KYC approved',
-                  onPressed: () {
-                    
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const KycSuccessScreen()),
-                    );
-                  },
-                ),
-
+                if (statusAsync.value == 'approved')
+                  AppButton(
+                    label: 'Continue',
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const KycSuccessScreen()),
+                      );
+                    },
+                  )
+                else
+                  AppButton(
+                    label: 'Refresh status',
+                    isLoading: statusAsync.isLoading,
+                    onPressed: () => ref.refresh(kycStatusProvider),
+                  ),
                 const SizedBox(height: AppSpacing.lg),
               ],
             ),

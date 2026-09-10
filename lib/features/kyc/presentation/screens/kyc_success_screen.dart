@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
-import '../home/home_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../providers/kyc_form_provider.dart';
 
-class KycSuccessScreen extends StatelessWidget {
+class KycSuccessScreen extends ConsumerWidget {
   const KycSuccessScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final form = ref.watch(kycFormProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -19,7 +23,6 @@ class KycSuccessScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: AppSpacing.xxl),
-
                 Container(
                   width: 88,
                   height: 88,
@@ -29,9 +32,7 @@ class KycSuccessScreen extends StatelessWidget {
                   ),
                   child: const Icon(Icons.check_rounded, color: AppColors.success, size: 44),
                 ),
-
                 const SizedBox(height: AppSpacing.xl),
-
                 Text("You're verified!", style: AppTextStyles.heading, textAlign: TextAlign.center),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
@@ -39,10 +40,7 @@ class KycSuccessScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySecondary,
                 ),
-
                 const SizedBox(height: AppSpacing.xl),
-
-                // Account Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -72,7 +70,10 @@ class KycSuccessScreen extends StatelessWidget {
                               children: [
                                 Text('ACCOUNT HOLDER', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
                                 const SizedBox(height: 4),
-                                Text('Vishnu Pillai', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                                Text(
+                                  form.name.isNotEmpty ? form.name : '-',
+                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                                ),
                               ],
                             ),
                           ),
@@ -91,10 +92,7 @@ class KycSuccessScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.lg),
-
-                // Details Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
@@ -109,15 +107,13 @@ class KycSuccessScreen extends StatelessWidget {
                       const Divider(color: AppColors.border),
                       _buildDetailRow('Account type', 'Savings'),
                       const Divider(color: AppColors.border),
-                      _buildDetailRow('Branch', 'Kochi'),
+                      _buildDetailRow('Branch', form.city.isNotEmpty ? form.city : '-'),
                       const Divider(color: AppColors.border),
                       _buildDetailRow('Debit card', 'Dispatched in 5-7 days'),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.xl),
-
                 AppButton(
                   label: 'Go to my account',
                   onPressed: () {
@@ -127,7 +123,6 @@ class KycSuccessScreen extends StatelessWidget {
                     );
                   },
                 ),
-
                 const SizedBox(height: AppSpacing.lg),
               ],
             ),
@@ -153,7 +148,10 @@ class KycSuccessScreen extends StatelessWidget {
               ),
               child: Text(
                 value,
-                style: AppTextStyles.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                style: AppTextStyles.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? AppColors.textPrimary,
+                ),
               ),
             )
           else

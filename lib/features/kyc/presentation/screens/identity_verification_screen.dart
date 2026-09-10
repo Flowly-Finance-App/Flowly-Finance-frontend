@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../domain/kyc_models.dart';
+import '../providers/document_upload_provider.dart';
 import 'document_upload_screen.dart';
 
-enum IdentityDocType { aadhaar, pan, passport, drivingLicence }
-
-class IdentityVerificationScreen extends StatefulWidget {
+class IdentityVerificationScreen extends ConsumerWidget {
   const IdentityVerificationScreen({super.key});
 
   @override
-  State<IdentityVerificationScreen> createState() => _IdentityVerificationScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final docAsync = ref.watch(documentUploadProvider);
+    final selected = docAsync.value?.docType ?? IdentityDocType.aadhaar;
 
-class _IdentityVerificationScreenState extends State<IdentityVerificationScreen> {
-  IdentityDocType _selected = IdentityDocType.aadhaar;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -41,10 +38,10 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
                 'Choose a government ID to complete your KYC. This is matched against official records automatically',
                 style: AppTextStyles.bodySecondary,
               ),
-
               const SizedBox(height: AppSpacing.lg),
-
               _buildOption(
+                ref: ref,
+                selected: selected,
                 type: IdentityDocType.aadhaar,
                 icon: Icons.badge_outlined,
                 title: 'Aadhaar card',
@@ -52,6 +49,8 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
               ),
               const SizedBox(height: AppSpacing.sm),
               _buildOption(
+                ref: ref,
+                selected: selected,
                 type: IdentityDocType.pan,
                 icon: Icons.credit_card_outlined,
                 title: 'PAN card',
@@ -59,6 +58,8 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
               ),
               const SizedBox(height: AppSpacing.sm),
               _buildOption(
+                ref: ref,
+                selected: selected,
                 type: IdentityDocType.passport,
                 icon: Icons.menu_book_outlined,
                 title: 'Passport',
@@ -66,23 +67,22 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
               ),
               const SizedBox(height: AppSpacing.sm),
               _buildOption(
+                ref: ref,
+                selected: selected,
                 type: IdentityDocType.drivingLicence,
                 icon: Icons.directions_car_outlined,
                 title: 'Driving licence',
                 subtitle: 'Manual review, 1-2 business days',
               ),
-
               const SizedBox(height: AppSpacing.xl),
-
               AppButton(
                 label: 'Continue',
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => DocumentUploadScreen(docType: _selected)),
+                    MaterialPageRoute(builder: (context) => const DocumentUploadScreen()),
                   );
                 },
               ),
-
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -92,15 +92,17 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
   }
 
   Widget _buildOption({
+    required WidgetRef ref,
+    required IdentityDocType selected,
     required IdentityDocType type,
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
-    final isSelected = _selected == type;
+    final isSelected = selected == type;
 
     return GestureDetector(
-      onTap: () => setState(() => _selected = type),
+      onTap: () => ref.read(documentUploadProvider.notifier).setDocType(type),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
@@ -127,9 +129,13 @@ class _IdentityVerificationScreenState extends State<IdentityVerificationScreen>
             ),
             Radio<IdentityDocType>(
               value: type,
-              groupValue: _selected,
+              groupValue: selected,
               activeColor: AppColors.primary,
-              onChanged: (value) => setState(() => _selected = value!),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(documentUploadProvider.notifier).setDocType(value);
+                }
+              },
             ),
           ],
         ),

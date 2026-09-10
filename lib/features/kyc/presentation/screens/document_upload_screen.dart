@@ -1,32 +1,27 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
-import 'identity_verification_screen.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../domain/kyc_models.dart';
+import '../providers/document_upload_provider.dart';
 import 'review_submit_screen.dart';
 
-class DocumentUploadScreen extends StatefulWidget {
-  final IdentityDocType docType;
-
-  const DocumentUploadScreen({super.key, required this.docType});
+class DocumentUploadScreen extends ConsumerStatefulWidget {
+  const DocumentUploadScreen({super.key});
 
   @override
-  State<DocumentUploadScreen> createState() => _DocumentUploadScreenState();
+  ConsumerState<DocumentUploadScreen> createState() => _DocumentUploadScreenState();
 }
 
-class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
-  XFile? _frontImage;
-  XFile? _backImage;
-  XFile? _selfieImage;
-  bool _isLoading = false;
-
+class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   final ImagePicker _picker = ImagePicker();
 
- 
-  String get _docLabel {
-    switch (widget.docType) {
+  String _docLabel(IdentityDocType type) {
+    switch (type) {
       case IdentityDocType.aadhaar:
         return 'Aadhaar';
       case IdentityDocType.pan:
@@ -37,9 +32,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
         return 'Driving licence';
     }
   }
-
-
-  bool get _needsBackSide => widget.docType != IdentityDocType.pan;
 
   Future<void> _pickImage({required bool isFront, required bool isBack, required bool isSelfie}) async {
     ImageSource? source;
@@ -84,43 +76,57 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
       imageQuality: 80,
     );
 
-    if (pickedFile != null) {
-      setState(() {
-        if (isFront) {
-          _frontImage = pickedFile;
-        } else if (isBack) {
-          _backImage = pickedFile;
-        } else if (isSelfie) {
-          _selfieImage = pickedFile;
-        }
-      });
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+    final notifier = ref.read(documentUploadProvider.notifier);
+
+    if (isFront) {
+      notifier.setFrontImage(file);
+    } else if (isBack) {
+      notifier.setBackImage(file);
+    } else if (isSelfie) {
+      notifier.setSelfieImage(file);
     }
   }
 
-  void _handleContinue() {
-    final missingBack = _needsBackSide && _backImage == null;
+  Future<void> _handleContinue() async {
+    final doc = ref.read(documentUploadProvider).value;
+    if (doc == null) return;
 
-    if (_frontImage == null || missingBack || _selfieImage == null) {
+    final missingBack = doc.needsBackSide && doc.backImage == null;
+
+    if (doc.frontImage == null || missingBack || doc.selfieImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all required uploads')),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
+    await ref.read(documentUploadProvider.notifier).uploadAll();
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+    final result = ref.read(documentUploadProvider);
+    if (!mounted) return;
 
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const ReviewSubmitScreen()),
+    if (result.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload failed: ${result.error}')),
       );
-    });
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const ReviewSubmitScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final docAsync = ref.watch(documentUploadProvider);
+    final doc = docAsync.value ?? const DocumentUploadState();
+    final isLoading = docAsync.isLoading;
+    final label = _docLabel(doc.docType);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -140,50 +146,42 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildUploadTile(
-                title: '$_docLabel - front side',
-                fileName: '${_docLabel.toLowerCase()}_front.jpg',
-                image: _frontImage,
+                title: '$label - front side',
+                image: doc.frontImage,
                 onTap: () => _pickImage(isFront: true, isBack: false, isSelfie: false),
+                onRemove: () => ref.read(documentUploadProvider.notifier).removeFrontImage(),
                 icon: Icons.badge_outlined,
               ),
-
-              if (_needsBackSide) ...[
+              if (doc.needsBackSide) ...[
                 const SizedBox(height: AppSpacing.md),
                 _buildUploadTile(
-                  title: '$_docLabel - back side',
-                  fileName: '${_docLabel.toLowerCase()}_back.jpg',
-                  image: _backImage,
+                  title: '$label - back side',
+                  image: doc.backImage,
                   onTap: () => _pickImage(isFront: false, isBack: true, isSelfie: false),
+                  onRemove: () => ref.read(documentUploadProvider.notifier).removeBackImage(),
                   icon: Icons.badge_outlined,
                 ),
               ],
-
               const SizedBox(height: AppSpacing.md),
-
               _buildUploadTile(
                 title: 'Live selfie',
-                fileName: null,
                 subtitleWhenEmpty: 'Tap to open camera',
-                image: _selfieImage,
+                image: doc.selfieImage,
                 onTap: () => _pickImage(isFront: false, isBack: false, isSelfie: true),
+                onRemove: () => ref.read(documentUploadProvider.notifier).removeSelfieImage(),
                 icon: Icons.camera_alt_outlined,
               ),
-
               const SizedBox(height: AppSpacing.lg),
-
               Text(
                 'Make sure all four corners of the document are visible and text is readable. Your selfie is used only to match your face against the ID Photo.',
                 style: AppTextStyles.caption,
               ),
-
               const SizedBox(height: AppSpacing.xl),
-
               AppButton(
                 label: 'Continue',
                 onPressed: _handleContinue,
-                isLoading: _isLoading,
+                isLoading: isLoading,
               ),
-
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -194,34 +192,36 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
 
   Widget _buildUploadTile({
     required String title,
-    required String? fileName,
     String? subtitleWhenEmpty,
-    required XFile? image,
+    required File? image,
     required VoidCallback onTap,
+    required VoidCallback onRemove,
     required IconData icon,
   }) {
     final isUploaded = image != null;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: isUploaded ? AppColors.success.withValues(alpha: 0.12) : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(
-            color: isUploaded ? AppColors.success.withValues(alpha: 0.4) : AppColors.border,
-          ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isUploaded ? AppColors.success.withValues(alpha: 0.12) : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: isUploaded ? AppColors.success.withValues(alpha: 0.4) : AppColors.border,
         ),
-        child: Row(
-          children: [
-            Icon(
-              isUploaded ? Icons.check_circle : icon,
-              color: isUploaded ? AppColors.success : AppColors.textSecondary,
-              size: 22,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
+      ),
+      child: Row(
+        children: [
+          if (isUploaded)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              child: Image.file(image, width: 44, height: 44, fit: BoxFit.cover),
+            )
+          else
+            Icon(icon, color: AppColors.textSecondary, size: 22),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: GestureDetector(
+              onTap: onTap,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -234,14 +234,19 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    isUploaded ? '${fileName ?? "photo.jpg"} . uploaded' : (subtitleWhenEmpty ?? 'Tap to upload'),
+                    isUploaded ? 'Uploaded — tap to replace' : (subtitleWhenEmpty ?? 'Tap to upload'),
                     style: AppTextStyles.caption,
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          if (isUploaded)
+            IconButton(
+              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
+              onPressed: onRemove,
+            ),
+        ],
       ),
     );
   }

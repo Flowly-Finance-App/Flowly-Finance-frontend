@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
-import '../../core/widgets/app_text_field.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import 'identity_verification_screen.dart';
 
-class KycScreen extends StatefulWidget {
+class KycScreen extends ConsumerStatefulWidget {
   const KycScreen({super.key});
 
   @override
-  State<KycScreen> createState() => _KycScreenState();
+  ConsumerState<KycScreen> createState() => _KycScreenState();
 }
 
-class _KycScreenState extends State<KycScreen> {
+class _KycScreenState extends ConsumerState<KycScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();

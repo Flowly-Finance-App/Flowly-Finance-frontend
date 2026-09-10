@@ -1,36 +1,58 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_spacing.dart';
-import '../../core/constants/app_text_styles.dart';
-import '../../core/widgets/app_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../providers/kyc_review_provider.dart';
+import '../providers/kyc_submit_provider.dart';
 import 'verification_progress_screen.dart';
 
-class ReviewSubmitScreen extends StatefulWidget {
+class ReviewSubmitScreen extends ConsumerStatefulWidget {
   const ReviewSubmitScreen({super.key});
 
   @override
-  State<ReviewSubmitScreen> createState() => _ReviewSubmitScreenState();
+  ConsumerState<ReviewSubmitScreen> createState() => _ReviewSubmitScreenState();
 }
 
-class _ReviewSubmitScreenState extends State<ReviewSubmitScreen> {
-  bool _isLoading = false;
+class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
+  void _handleSubmit() async {
+    await ref.read(kycSubmitProvider.notifier).submit();
 
-  void _handleSubmit() {
-    setState(() => _isLoading = true);
+    final result = ref.read(kycSubmitProvider);
+    if (!mounted) return;
 
-    
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const VerificationProgressScreen()),
+    if (result.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Submission failed: ${result.error}')),
       );
-    });
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const VerificationProgressScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final summary = ref.watch(kycReviewSummaryProvider);
+    final submitState = ref.watch(kycSubmitProvider);
+    final isSubmitting = submitState.isLoading;
+
+    final personalDetails = {
+      'Name': summary['Name'] ?? '',
+      'Date of birth': summary['Date of birth'] ?? '',
+      'Mobile': summary['Mobile'] ?? '',
+      'Branch': summary['Branch'] ?? '',
+    };
+
+    final documentDetails = {
+      'Document type': summary['Document type'] ?? '',
+      'Front & back': summary['Front & back'] ?? '',
+      'Selfie': summary['Selfie'] ?? '',
+    };
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -51,38 +73,22 @@ class _ReviewSubmitScreenState extends State<ReviewSubmitScreen> {
             children: [
               Text('Personal Details', style: AppTextStyles.subheading),
               const SizedBox(height: AppSpacing.sm),
-              _buildInfoCard(const {
-                'Name': 'Vishn Pillai',
-                'Date of birth': '24/09/1999',
-                'Mobile': '+919876543210',
-                'Branch': 'Kochi',
-              }),
-
+              _buildInfoCard(personalDetails),
               const SizedBox(height: AppSpacing.lg),
-
               Text('Identity Document', style: AppTextStyles.subheading),
               const SizedBox(height: AppSpacing.sm),
-              _buildInfoCard(const {
-                'Document type': 'Aadhar card',
-                'Front & back': 'Uploaded',
-                'Selfie': 'Captured',
-              }, highlightValueColor: AppColors.success),
-
+              _buildInfoCard(documentDetails, highlightValueColor: AppColors.success),
               const SizedBox(height: AppSpacing.lg),
-
               Text(
                 'By submitting, you consent to Flowly verifying these details with UIDI and your bureau record, in line with our KYC policy.',
                 style: AppTextStyles.caption,
               ),
-
               const SizedBox(height: AppSpacing.xl),
-
               AppButton(
                 label: 'Submit for Verification',
                 onPressed: _handleSubmit,
-                isLoading: _isLoading,
+                isLoading: isSubmitting,
               ),
-
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
