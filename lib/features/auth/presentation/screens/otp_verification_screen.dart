@@ -1,28 +1,28 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../providers/forgot_password_provider.dart';
+import '../providers/otp_verification_provider.dart';
 
-class OtpVerificationScreen extends StatefulWidget {
+class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String email;
 
   const OtpVerificationScreen({super.key, required this.email});
 
   @override
-  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
-class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
- 
+class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
-  final List<FocusNode> _focusNodes =
-      List.generate(6, (index) => FocusNode());
+  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
 
-  bool _isLoading = false;
   int _secondsRemaining = 30;
   Timer? _timer;
 
@@ -46,7 +46,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   String get _enteredOtp => _controllers.map((c) => c.text).join();
 
-  void _handleVerify() {
+  Future<void> _handleVerify() async {
     if (_enteredOtp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the complete 6-digit OTP')),
@@ -54,20 +54,32 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    await ref.read(otpVerificationProvider.notifier).verify(
+          email: widget.email,
+          otp: _enteredOtp,
+        );
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+    final result = ref.read(otpVerificationProvider);
+    if (!mounted) return;
 
+    if (result.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP verified (API not connected yet)')),
+        SnackBar(content: Text('Verification failed: ${result.error}')),
       );
-    });
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('OTP verified')),
+    );
+    // TODO: navigate to a Reset Password screen once that screen exists.
   }
 
-  void _handleResend() {
+  Future<void> _handleResend() async {
     if (_secondsRemaining > 0) return;
+
+    await ref.read(forgotPasswordProvider.notifier).sendOtp(widget.email);
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('OTP resent')),
@@ -89,6 +101,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final verifyState = ref.watch(otpVerificationProvider);
+    final isLoading = verifyState.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -116,7 +131,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // 6 OTP Boxes
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(6, (index) => _buildOtpBox(index)),
@@ -124,7 +138,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               const SizedBox(height: AppSpacing.lg),
 
-              // Resend Timer / Button
               Center(
                 child: _secondsRemaining > 0
                     ? Text(
@@ -148,7 +161,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               AppButton(
                 label: 'Verify',
                 onPressed: _handleVerify,
-                isLoading: _isLoading,
+                isLoading: isLoading,
               ),
             ],
           ),
@@ -170,7 +183,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         style: AppTextStyles.heading,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
-          counterText: '', 
+          counterText: '',
           fillColor: AppColors.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -182,11 +195,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           ),
         ),
         onChanged: (value) {
-         
           if (value.isNotEmpty && index < 5) {
             _focusNodes[index + 1].requestFocus();
           }
-          
           if (value.isEmpty && index > 0) {
             _focusNodes[index - 1].requestFocus();
           }

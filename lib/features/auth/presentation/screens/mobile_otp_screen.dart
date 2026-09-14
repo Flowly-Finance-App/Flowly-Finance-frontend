@@ -1,39 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../providers/mobile_otp_provider.dart';
 import 'verify_otp_screen.dart';
 
-class MobileOtpScreen extends StatefulWidget {
+class MobileOtpScreen extends ConsumerStatefulWidget {
   final String mobileNumber;
 
   const MobileOtpScreen({super.key, required this.mobileNumber});
 
   @override
-  State<MobileOtpScreen> createState() => _MobileOtpScreenState();
+  ConsumerState<MobileOtpScreen> createState() => _MobileOtpScreenState();
 }
 
-class _MobileOtpScreenState extends State<MobileOtpScreen> {
-  bool _isLoading = false;
+class _MobileOtpScreenState extends ConsumerState<MobileOtpScreen> {
+  Future<void> _handleGetOtp() async {
+    await ref.read(mobileOtpProvider.notifier).sendOtp(widget.mobileNumber);
 
-  void _handleGetOtp() {
-    setState(() => _isLoading = true);
+    final result = ref.read(mobileOtpProvider);
+    if (!mounted) return;
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => VerifyOtpScreen(mobileNumber: widget.mobileNumber),
-        ),
+    if (result.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not send OTP: ${result.error}')),
       );
-    });
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VerifyOtpScreen(mobileNumber: widget.mobileNumber),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final sendOtpState = ref.watch(mobileOtpProvider);
+    final isLoading = sendOtpState.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -51,7 +59,6 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
             children: [
               const SizedBox(height: AppSpacing.xl),
 
-              // Icon circle
               Container(
                 width: 88,
                 height: 88,
@@ -76,17 +83,14 @@ class _MobileOtpScreenState extends State<MobileOtpScreen> {
 
               Text('Enter Mobile Number', style: AppTextStyles.caption),
               const SizedBox(height: AppSpacing.xs),
-              Text(
-                widget.mobileNumber,
-                style: AppTextStyles.subheading,
-              ),
+              Text(widget.mobileNumber, style: AppTextStyles.subheading),
 
               const SizedBox(height: AppSpacing.xxl),
 
               AppButton(
                 label: 'Get OTP',
                 onPressed: _handleGetOtp,
-                isLoading: _isLoading,
+                isLoading: isLoading,
               ),
             ],
           ),

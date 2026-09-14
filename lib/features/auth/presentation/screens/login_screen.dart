@@ -1,25 +1,26 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flowly_finance_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:flowly_finance_app/features/auth/presentation/screens/register_screen.dart';
-import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../providers/login_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,23 +29,28 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    if (!_formKey.currentState!.validate()) {
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    await ref.read(loginProvider.notifier).login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+    final result = ref.read(loginProvider);
+    if (!mounted) return;
+
+    if (result.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${result.error}')),
+      );
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login button pressed (API not connected yet)'),
-        ),
-      );
-    });
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      (route) => false,
+    );
   }
 
   void _handleGoogleSignIn() {
@@ -55,6 +61,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loginState = ref.watch(loginProvider);
+    final isLoading = loginState.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -70,8 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: AppSpacing.md),
 
-                // Logo
-                // Logo
                 Center(
                   child: Image.asset(
                     'assets/images/flowly-image-png.png',
@@ -88,7 +95,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppSpacing.xl),
 
-                // Email Field
                 AppTextField(
                   label: 'Email Address',
                   hintText: 'Enter Email Address',
@@ -104,7 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Password Field
                 AppTextField(
                   label: 'Password',
                   hintText: 'Enter password',
@@ -123,7 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // Forgot Password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -146,16 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Login Button
                 AppButton(
                   label: 'Login',
                   onPressed: _handleLogin,
-                  isLoading: _isLoading,
+                  isLoading: isLoading,
                 ),
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // OR Divider
                 Row(
                   children: [
                     const Expanded(child: Divider(color: AppColors.border)),
@@ -200,7 +202,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: AppSpacing.xl),
 
-                // Register Navigation
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -219,7 +220,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text(
                           'Register',
-
                           style: AppTextStyles.body.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w600,
