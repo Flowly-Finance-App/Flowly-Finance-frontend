@@ -12,9 +12,7 @@ class LoadingIndicator extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(
-            color: AppColors.primary,
-          ),
+          const CircularProgressIndicator(color: AppColors.primary),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -27,7 +25,6 @@ class LoadingIndicator extends StatelessWidget {
     );
   }
 }
-
 
 class LoadingOverlay extends StatelessWidget {
   const LoadingOverlay({super.key});

@@ -74,7 +74,6 @@ class MessageBanner extends StatelessWidget {
   }
 }
 
-
 void showAppSnackBar(
   BuildContext context, {
   required String message,
@@ -83,8 +82,8 @@ void showAppSnackBar(
   final color = type == MessageType.error
       ? AppColors.error
       : type == MessageType.success
-          ? AppColors.success
-          : AppColors.warning;
+      ? AppColors.success
+      : AppColors.warning;
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

@@ -4,9 +4,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
+import '../providers/kyc_form_provider.dart';
+import '../providers/document_upload_provider.dart';
 import '../providers/kyc_review_provider.dart';
-import '../providers/kyc_submit_provider.dart';
-import 'verification_progress_screen.dart';
+import '../../../onboarding/presentation/screens/create_mpin_screen.dart';
 
 class ReviewSubmitScreen extends ConsumerStatefulWidget {
   const ReviewSubmitScreen({super.key});
@@ -16,29 +18,31 @@ class ReviewSubmitScreen extends ConsumerStatefulWidget {
 }
 
 class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
-  void _handleSubmit() async {
-    await ref.read(kycSubmitProvider.notifier).submit();
+  void _handleSubmit() {
+    final kycForm = ref.read(kycFormProvider);
+    final doc = ref.read(documentUploadProvider).value;
 
-    final result = ref.read(kycSubmitProvider);
-    if (!mounted) return;
+    ref
+        .read(onboardingProvider.notifier)
+        .updateKyc(
+          dob: kycForm.dob,
+          gender: kycForm.gender,
+          address: kycForm.address,
+          idType: doc?.docType.name ?? '',
 
-    if (result.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Submission failed: ${result.error}')),
-      );
-      return;
-    }
+          idNumber: '',
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const VerificationProgressScreen()),
-    );
+          documentUrl: '',
+        );
+
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const CreateMpinScreen()));
   }
 
   @override
   Widget build(BuildContext context) {
     final summary = ref.watch(kycReviewSummaryProvider);
-    final submitState = ref.watch(kycSubmitProvider);
-    final isSubmitting = submitState.isLoading;
 
     final personalDetails = {
       'Name': summary['Name'] ?? '',
@@ -61,34 +65,49 @@ class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
         title: Text('Review & Submit', style: AppTextStyles.subheading),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Personal Details', style: AppTextStyles.subheading),
               const SizedBox(height: AppSpacing.sm),
               _buildInfoCard(personalDetails),
+
               const SizedBox(height: AppSpacing.lg),
+
               Text('Identity Document', style: AppTextStyles.subheading),
               const SizedBox(height: AppSpacing.sm),
-              _buildInfoCard(documentDetails, highlightValueColor: AppColors.success),
+              _buildInfoCard(
+                documentDetails,
+                highlightValueColor: AppColors.success,
+              ),
+
               const SizedBox(height: AppSpacing.lg),
+
               Text(
                 'By submitting, you consent to Flowly verifying these details with UIDI and your bureau record, in line with our KYC policy.',
                 style: AppTextStyles.caption,
               ),
+
               const SizedBox(height: AppSpacing.xl),
+
               AppButton(
-                label: 'Submit for Verification',
+                label: 'Continue to Create MPIN',
                 onPressed: _handleSubmit,
-                isLoading: isSubmitting,
               ),
+
               const SizedBox(height: AppSpacing.lg),
             ],
           ),
@@ -97,7 +116,10 @@ class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
     );
   }
 
-  Widget _buildInfoCard(Map<String, String> items, {Color? highlightValueColor}) {
+  Widget _buildInfoCard(
+    Map<String, String> items, {
+    Color? highlightValueColor,
+  }) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(

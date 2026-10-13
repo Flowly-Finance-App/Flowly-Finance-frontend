@@ -41,16 +41,16 @@ class KycIntroScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Column(
                     children: [
                       _buildStepRow('Personal Details', '30sec'),
-                      const Divider(color: AppColors.border),
+                      const Divider(color: AppColors.divider),
                       _buildStepRow('Identity Document', '1min'),
-                      const Divider(color: AppColors.border),
+                      const Divider(color: AppColors.divider),
                       _buildStepRow('Selfie Verification', '30sec'),
-                      const Divider(color: AppColors.border),
+                      const Divider(color: AppColors.divider),
                       _buildStepRow('Review & Submit', '1min'),
                     ],
                   ),

@@ -1,3 +1,4 @@
+import 'package:flowly_finance_app/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -5,8 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../providers/register_provider.dart';
-import 'mobile_otp_screen.dart';
+import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -21,8 +21,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _mobileController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
 
   bool _agreedToTerms = false;
 
@@ -31,12 +29,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleRegister() async {
+  void _handleRegister() {
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreedToTerms) {
@@ -46,26 +42,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
-    await ref.read(registerProvider.notifier).register(
-          name: _nameController.text.trim(),
+    ref
+        .read(onboardingProvider.notifier)
+        .updateRegistration(
+          fullName: _nameController.text.trim(),
           email: _emailController.text.trim(),
-          mobile: _mobileController.text.trim(),
-          password: _passwordController.text,
+          phone: _mobileController.text.trim(),
         );
 
-    final result = ref.read(registerProvider);
-    if (!mounted) return;
-
-    if (result.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: ${result.error}')),
-      );
-      return;
-    }
-
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MobileOtpScreen(mobileNumber: _mobileController.text.trim()),
+        builder: (context) =>
+           VerifyOtpScreen (email: _emailController.text.trim()),
       ),
     );
   }
@@ -78,16 +66,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final registerState = ref.watch(registerProvider);
-    final isLoading = registerState.isLoading;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -154,7 +142,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your email';
                     }
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
                     if (!emailRegex.hasMatch(value.trim())) {
                       return 'Enter a valid email address';
                     }
@@ -176,44 +166,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     }
                     if (value.trim().length != 10) {
                       return 'Enter a valid 10-digit mobile number';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                AppTextField(
-                  label: 'Password',
-                  hintText: 'Password',
-                  controller: _passwordController,
-                  isPassword: true,
-                  prefixIcon: Icons.lock_outline,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                AppTextField(
-                  label: 'Confirm Password',
-                  hintText: 'Confirm Password',
-                  controller: _confirmPasswordController,
-                  isPassword: true,
-                  prefixIcon: Icons.lock_outline,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
                     }
                     return null;
                   },
@@ -269,11 +221,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                AppButton(
-                  label: 'Register',
-                  onPressed: _handleRegister,
-                  isLoading: isLoading,
-                ),
+                AppButton(label: 'Continue', onPressed: _handleRegister),
 
                 const SizedBox(height: AppSpacing.lg),
 
@@ -281,7 +229,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   children: [
                     const Expanded(child: Divider(color: AppColors.border)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
                       child: Text('OR', style: AppTextStyles.caption),
                     ),
                     const Expanded(child: Divider(color: AppColors.border)),
@@ -298,13 +248,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                       ),
                     ),
-                    icon: const Icon(Icons.g_mobiledata, size: 28, color: AppColors.textPrimary),
+                    icon: const Icon(
+                      Icons.g_mobiledata,
+                      size: 28,
+                      color: AppColors.textPrimary,
+                    ),
                     label: Text(
                       'Continue with Google',
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -315,7 +273,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Already have an account? ', style: AppTextStyles.bodySecondary),
+                      Text(
+                        'Already have an account? ',
+                        style: AppTextStyles.bodySecondary,
+                      ),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
                         child: Text(

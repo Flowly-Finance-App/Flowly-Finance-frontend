@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../domain/kyc_models.dart';
+import '../../domain/entities/kyc_entity.dart';
 import '../providers/document_upload_provider.dart';
 import 'document_upload_screen.dart';
 
@@ -109,7 +109,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primary : AppColors.divider,
             width: isSelected ? 1.5 : 1,
           ),
         ),

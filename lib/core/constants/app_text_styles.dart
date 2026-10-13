@@ -6,38 +6,38 @@ class AppTextStyles {
   AppTextStyles._();
 
   static TextStyle get heading => GoogleFonts.poppins(
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      );
+    fontSize: 24,
+    fontWeight: FontWeight.w700,
+    color: AppColors.textPrimary,
+  );
 
   static TextStyle get subheading => GoogleFonts.poppins(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      );
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
 
   static TextStyle get body => GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: AppColors.textPrimary,
-      );
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textPrimary,
+  );
 
   static TextStyle get bodySecondary => GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: AppColors.textSecondary,
-      );
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+  );
 
   static TextStyle get caption => GoogleFonts.poppins(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
-        color: AppColors.textSecondary,
-      );
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+  );
 
   static TextStyle get buttonText => GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      );
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
 }

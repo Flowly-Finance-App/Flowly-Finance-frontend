@@ -1,0 +1,1 @@
+export 'entities/loan_details_entity.dart';

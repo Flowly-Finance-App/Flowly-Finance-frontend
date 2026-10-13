@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../domain/kyc_models.dart';
+import '../../domain/entities/kyc_entity.dart';
 import '../providers/document_upload_provider.dart';
 import 'review_submit_screen.dart';
 
@@ -206,7 +206,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         color: isUploaded ? AppColors.success.withValues(alpha: 0.12) : AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(
-          color: isUploaded ? AppColors.success.withValues(alpha: 0.4) : AppColors.border,
+          color: isUploaded ? AppColors.success.withValues(alpha: 0.4) : AppColors.divider,
         ),
       ),
       child: Row(

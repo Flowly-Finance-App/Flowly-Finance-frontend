@@ -57,9 +57,6 @@ class AppButton extends StatelessWidget {
         ),
       );
     }
-    return Text(
-      label,
-      style: AppTextStyles.buttonText.copyWith(color: color),
-    );
+    return Text(label, style: AppTextStyles.buttonText.copyWith(color: color));
   }
 }

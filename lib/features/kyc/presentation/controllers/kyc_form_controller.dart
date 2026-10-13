@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/kyc_models.dart';
+import '../../domain/entities/kyc_entity.dart';
 
 class KycFormController extends Notifier<KycFormState> {
   @override
@@ -32,4 +32,6 @@ class KycFormController extends Notifier<KycFormState> {
       address: address,
     );
   }
+
+  Future<void> sendOtp(String email) async {}
 }

@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../home/presentation/screens/home_screen.dart';
+import '../../../main/presentation/screens/main_navigation_screen.dart';
 import '../providers/kyc_form_provider.dart';
 
 class KycSuccessScreen extends ConsumerWidget {
@@ -23,6 +23,7 @@ class KycSuccessScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const SizedBox(height: AppSpacing.xxl),
+
                 Container(
                   width: 88,
                   height: 88,
@@ -30,17 +31,30 @@ class KycSuccessScreen extends ConsumerWidget {
                     color: AppColors.success.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check_rounded, color: AppColors.success, size: 44),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: AppColors.success,
+                    size: 44,
+                  ),
                 ),
+
                 const SizedBox(height: AppSpacing.xl),
-                Text("You're verified!", style: AppTextStyles.heading, textAlign: TextAlign.center),
+
+                Text(
+                  "You're verified!",
+                  style: AppTextStyles.heading,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Your KYC approved and your Flowly savings\naccount is now active',
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySecondary,
                 ),
+
                 const SizedBox(height: AppSpacing.xl),
+
+                // Account Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.lg),
@@ -53,12 +67,17 @@ class KycSuccessScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'FLOWLY SAVINGS ACCOUNT',
-                        style: AppTextStyles.caption.copyWith(color: Colors.white70),
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white70,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         '4021  7789  0043',
-                        style: AppTextStyles.heading.copyWith(color: Colors.white, letterSpacing: 1.5),
+                        style: AppTextStyles.heading.copyWith(
+                          color: Colors.white,
+                          letterSpacing: 1.5,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Row(
@@ -68,11 +87,19 @@ class KycSuccessScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('ACCOUNT HOLDER', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                                Text(
+                                  'ACCOUNT HOLDER',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
                                 Text(
                                   form.name.isNotEmpty ? form.name : '-',
-                                  style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                                  style: AppTextStyles.body.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -81,9 +108,20 @@ class KycSuccessScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('IFSC', style: AppTextStyles.caption.copyWith(color: Colors.white70)),
+                                Text(
+                                  'IFSC',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
-                                Text('FLWY0KOCO01', style: AppTextStyles.body.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                                Text(
+                                  'FLWY0KOCO01',
+                                  style: AppTextStyles.body.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -92,37 +130,53 @@ class KycSuccessScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+
                 const SizedBox(height: AppSpacing.lg),
+
+                // Details Card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Column(
                     children: [
-                      _buildDetailRow('KYC status', 'Verified', valueColor: AppColors.success, isBadge: true),
-                      const Divider(color: AppColors.border),
+                      _buildDetailRow(
+                        'KYC status',
+                        'Verified',
+                        valueColor: AppColors.success,
+                        isBadge: true,
+                      ),
+                      const Divider(color: AppColors.divider),
                       _buildDetailRow('Account type', 'Savings'),
-                      const Divider(color: AppColors.border),
-                      _buildDetailRow('Branch', form.city.isNotEmpty ? form.city : '-'),
-                      const Divider(color: AppColors.border),
+                      const Divider(color: AppColors.divider),
+                      _buildDetailRow(
+                        'Branch',
+                        form.city.isNotEmpty ? form.city : '-',
+                      ),
+                      const Divider(color: AppColors.divider),
                       _buildDetailRow('Debit card', 'Dispatched in 5-7 days'),
                     ],
                   ),
                 ),
+
                 const SizedBox(height: AppSpacing.xl),
+
                 AppButton(
                   label: 'Go to my account',
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigationScreen(),
+                      ),
                       (route) => false,
                     );
                   },
                 ),
+
                 const SizedBox(height: AppSpacing.lg),
               ],
             ),
@@ -132,7 +186,12 @@ class KycSuccessScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {Color? valueColor, bool isBadge = false}) {
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBadge = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
@@ -141,16 +200,19 @@ class KycSuccessScreen extends ConsumerWidget {
           Text(label, style: AppTextStyles.bodySecondary),
           if (isBadge)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 4,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.success.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 value,
-                style: AppTextStyles.body.copyWith(
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.success,
                   fontWeight: FontWeight.w600,
-                  color: valueColor ?? AppColors.textPrimary,
                 ),
               ),
             )

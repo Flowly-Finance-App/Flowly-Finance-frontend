@@ -24,7 +24,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: showBackButton
           ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.textPrimary,
+              ),
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,

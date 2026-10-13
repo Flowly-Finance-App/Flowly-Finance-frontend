@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/kyc_repository.dart';
-import '../../domain/kyc_models.dart';
+import '../../data/repository/kyc_repository_impl.dart';
+import '../../domain/entities/kyc_entity.dart';
 
 class DocumentUploadController extends AsyncNotifier<DocumentUploadState> {
   @override
@@ -18,7 +18,7 @@ class DocumentUploadController extends AsyncNotifier<DocumentUploadState> {
   void setFrontImage(File file) {
     final current = state.value ?? const DocumentUploadState();
     state = AsyncData(current.copyWith(frontImage: file));
-  }
+  }    
 
   void setBackImage(File file) {
     final current = state.value ?? const DocumentUploadState();

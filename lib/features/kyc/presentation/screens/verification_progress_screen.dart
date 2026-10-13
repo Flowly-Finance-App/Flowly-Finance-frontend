@@ -30,10 +30,18 @@ class VerificationProgressScreen extends ConsumerWidget {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.hourglass_top_rounded, color: AppColors.primary, size: 44),
+                  child: const Icon(
+                    Icons.hourglass_top_rounded,
+                    color: AppColors.primary,
+                    size: 44,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text('Verification in Progress', style: AppTextStyles.heading, textAlign: TextAlign.center),
+                Text(
+                  'Verification in Progress',
+                  style: AppTextStyles.heading,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   "We've received your details. Most accounts are\nverified within a few hours - instant for Aadhaar e-KYC.",
@@ -57,15 +65,17 @@ class VerificationProgressScreen extends ConsumerWidget {
                       _buildConnector(),
                       _buildStep(
                         number: '2',
-                        icon: statusAsync.value == 'approved' ? Icons.check_circle : null,
+                        icon: statusAsync.value == 'approved'
+                            ? Icons.check_circle
+                            : null,
                         iconColor: AppColors.success,
                         title: 'KYC under review',
                         subtitle: statusAsync.when(
                           data: (status) => status == 'approved'
                               ? 'Verified'
                               : status == 'rejected'
-                                  ? 'Rejected — please re-check documents'
-                                  : 'Our team is verifying your documents',
+                              ? 'Rejected — please re-check documents'
+                              : 'Our team is verifying your documents',
                           loading: () => 'Checking status...',
                           error: (e, _) => 'Could not check status',
                         ),
@@ -74,7 +84,9 @@ class VerificationProgressScreen extends ConsumerWidget {
                       _buildConnector(),
                       _buildStep(
                         number: '3',
-                        icon: statusAsync.value == 'approved' ? Icons.check_circle : null,
+                        icon: statusAsync.value == 'approved'
+                            ? Icons.check_circle
+                            : null,
                         iconColor: AppColors.success,
                         title: 'Account creation',
                         subtitle: 'Happens automatically once approved',
@@ -89,7 +101,9 @@ class VerificationProgressScreen extends ConsumerWidget {
                     label: 'Continue',
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => const KycSuccessScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const KycSuccessScreen(),
+                        ),
                       );
                     },
                   )
@@ -125,14 +139,23 @@ class VerificationProgressScreen extends ConsumerWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: isDone ? AppColors.success.withValues(alpha: 0.15) : AppColors.surface,
+              color: isDone
+                  ? AppColors.success.withValues(alpha: 0.15)
+                  : AppColors.surface,
               shape: BoxShape.circle,
-              border: Border.all(color: isDone ? AppColors.success : AppColors.border),
+              border: Border.all(
+                color: isDone ? AppColors.success : AppColors.divider,
+              ),
             ),
             child: Center(
               child: icon != null
                   ? Icon(icon, color: iconColor, size: 18)
-                  : Text(number, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+                  : Text(
+                      number,
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -140,7 +163,12 @@ class VerificationProgressScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(subtitle, style: AppTextStyles.caption),
               ],
@@ -154,7 +182,7 @@ class VerificationProgressScreen extends ConsumerWidget {
   Widget _buildConnector() {
     return Padding(
       padding: const EdgeInsets.only(left: 13),
-      child: Container(width: 1, height: 24, color: AppColors.border),
+      child: Container(width: 1, height: 24, color: AppColors.divider),
     );
   }
 }
