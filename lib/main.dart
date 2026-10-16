@@ -1,4 +1,3 @@
-   import 'package:flowly_finance_app/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
@@ -15,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Small Finance App',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false  ,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
     );
