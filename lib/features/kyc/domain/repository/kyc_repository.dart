@@ -1,7 +1,13 @@
 import 'dart:io';
 
 abstract class KycRepository {
-  Future<void> uploadDocument(File file, String side);
-  Future<void> submitKyc(Map<String, dynamic> payload);
+  Future<void> submitKyc({
+    required Map<String, String> fields,
+    File? pan,
+    File? aadhaar,
+    File? selfie,
+    File? document,
+  });
+
   Future<String> fetchKycStatus();
 }

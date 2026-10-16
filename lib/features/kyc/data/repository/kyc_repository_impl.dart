@@ -8,13 +8,20 @@ class KycRepositoryImpl implements KycRepository {
   KycRepositoryImpl(this._remote);
 
   @override
-  Future<void> uploadDocument(File file, String side) {
-    return _remote.uploadDocument(file, side);
-  }
-
-  @override
-  Future<void> submitKyc(Map<String, dynamic> payload) {
-    return _remote.submitKyc(payload);
+  Future<void> submitKyc({
+    required Map<String, String> fields,
+    File? pan,
+    File? aadhaar,
+    File? selfie,
+    File? document,
+  }) {
+    return _remote.submitKyc(
+      fields: fields,
+      pan: pan,
+      aadhaar: aadhaar,
+      selfie: selfie,
+      document: document,
+    );
   }
 
   @override

@@ -30,7 +30,7 @@ class ApplyLoanRemoteDataSource {
       }
     }
     return [];
-  }
+  }  
 
   Future<Map<String, dynamic>> resubmitDocuments({
     required String applicationId,

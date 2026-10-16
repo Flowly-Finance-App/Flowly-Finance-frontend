@@ -1,3 +1,4 @@
+import 'package:flowly_finance_app/features/kyc/presentation/screens/kyc_success_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -8,7 +9,6 @@ import '../../../onboarding/presentation/providers/onboarding_provider.dart';
 import '../providers/kyc_form_provider.dart';
 import '../providers/document_upload_provider.dart';
 import '../providers/kyc_review_provider.dart';
-import '../../../onboarding/presentation/screens/create_mpin_screen.dart';
 
 class ReviewSubmitScreen extends ConsumerStatefulWidget {
   const ReviewSubmitScreen({super.key});
@@ -37,7 +37,7 @@ class _ReviewSubmitScreenState extends ConsumerState<ReviewSubmitScreen> {
 
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const CreateMpinScreen()));
+    ).push(MaterialPageRoute(builder: (context) => const KycSuccessScreen()));
   }
 
   @override

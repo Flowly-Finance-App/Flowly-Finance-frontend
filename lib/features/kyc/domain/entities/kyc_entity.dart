@@ -10,6 +10,8 @@ class KycFormState {
   final String email;
   final String city;
   final String address;
+  final String idNumber;
+  final String panNumber;
 
   const KycFormState({
     this.name = '',
@@ -19,6 +21,8 @@ class KycFormState {
     this.email = '',
     this.city = '',
     this.address = '',
+    this.idNumber = '',
+    this.panNumber = '',
   });
 
   KycFormState copyWith({
@@ -29,6 +33,8 @@ class KycFormState {
     String? email,
     String? city,
     String? address,
+    String? idNumber,
+    String? panNumber,
   }) {
     return KycFormState(
       name: name ?? this.name,
@@ -38,6 +44,8 @@ class KycFormState {
       email: email ?? this.email,
       city: city ?? this.city,
       address: address ?? this.address,
+      idNumber: idNumber ?? this.idNumber,
+      panNumber: panNumber ?? this.panNumber,
     );
   }
 }

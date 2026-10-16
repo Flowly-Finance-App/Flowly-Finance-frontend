@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repository/kyc_repository_impl.dart';
 import '../../domain/entities/kyc_entity.dart';
 
 class DocumentUploadController extends AsyncNotifier<DocumentUploadState> {
@@ -18,7 +17,7 @@ class DocumentUploadController extends AsyncNotifier<DocumentUploadState> {
   void setFrontImage(File file) {
     final current = state.value ?? const DocumentUploadState();
     state = AsyncData(current.copyWith(frontImage: file));
-  }    
+  }
 
   void setBackImage(File file) {
     final current = state.value ?? const DocumentUploadState();
@@ -43,27 +42,5 @@ class DocumentUploadController extends AsyncNotifier<DocumentUploadState> {
   void removeSelfieImage() {
     final current = state.value ?? const DocumentUploadState();
     state = AsyncData(current.copyWith(clearSelfie: true));
-  }
-
-  Future<void> uploadAll() async {
-    final current = state.value;
-    if (current == null) return;
-
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final repo = ref.read(kycRepositoryProvider);
-
-      if (current.frontImage != null) {
-        await repo.uploadDocument(current.frontImage!, 'front');
-      }
-      if (current.needsBackSide && current.backImage != null) {
-        await repo.uploadDocument(current.backImage!, 'back');
-      }
-      if (current.selfieImage != null) {
-        await repo.uploadDocument(current.selfieImage!, 'selfie');
-      }
-
-      return current.copyWith(isUploaded: true);
-    });
   }
 }

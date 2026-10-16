@@ -1,4 +1,4 @@
-import 'package:flowly_finance_app/features/onboarding/presentation/screens/account_activated_screen.dart';
+import 'package:flowly_finance_app/features/kyc/presentation/screens/kyc_intro_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,7 +61,7 @@ class _ConfirmMpinScreenState extends ConsumerState<ConfirmMpinScreen> {
     }
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const AccountActivatedScreen()),
+      MaterialPageRoute(builder: (context) => const KycIntroScreen()),
       (route) => false,
     );
   }

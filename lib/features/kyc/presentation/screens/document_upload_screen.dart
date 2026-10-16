@@ -90,7 +90,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     }
   }
 
-  Future<void> _handleContinue() async {
+   void _handleContinue() {
     final doc = ref.read(documentUploadProvider).value;
     if (doc == null) return;
 
@@ -99,18 +99,6 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     if (doc.frontImage == null || missingBack || doc.selfieImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all required uploads')),
-      );
-      return;
-    }
-
-    await ref.read(documentUploadProvider.notifier).uploadAll();
-
-    final result = ref.read(documentUploadProvider);
-    if (!mounted) return;
-
-    if (result.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: ${result.error}')),
       );
       return;
     }
